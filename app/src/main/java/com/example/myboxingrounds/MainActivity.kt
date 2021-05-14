@@ -1,9 +1,12 @@
 package com.example.myboxingrounds
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
 
@@ -105,6 +108,28 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
 
         }
+
+        val appSettingPrefs: SharedPreferences = getSharedPreferences( "AppSettingPrefs", 0)
+        val sharedPrefsEditor: SharedPreferences.Editor = appSettingPrefs.edit()
+        val isDark: Boolean = appSettingPrefs.getBoolean("darkmode", false)
+
+        if( isDark ) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+        // dark/light mode button
+        imageButton.setOnClickListener(View.OnClickListener {
+            if( isDark ){
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                sharedPrefsEditor.putBoolean("darkmode", false)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPrefsEditor.putBoolean("darkmode", true)
+            }
+            sharedPrefsEditor.apply()
+        })
 
     }
 
