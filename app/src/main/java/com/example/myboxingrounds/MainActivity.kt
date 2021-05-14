@@ -15,27 +15,27 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var rounds: Int = 0
-        var seconds: Int = 0
-        var restTime: Int = 0
+        var rounds: Int = 5
+        var seconds: Int = 300
+        var restTime: Int = 60
+        var timerInterval: Int = 30
+        var restInterval: Int = 15
 
 
         // Set timer and rounds
         seekRounds.max = 30
         seekRounds.min = 1
         seekRounds.progress = 5
-        seekRest.max = 120
+        seekRest.max = 20
         seekRest.min = 0
-        seekRest.progress = 60
-        seekTimer.max = 600
-        seekTimer.min = 10
-        seekTimer.progress = 120
+        seekRest.progress = 2
+        seekTimer.max = 20
+        seekTimer.min = 1
+        seekTimer.progress = 4
+
         textRounds.text = seekRounds.progress.toString()
-        textRest.text = convertToTime(seekRest.progress)
-        textTimer.text = convertToTime(seekTimer.progress)
-        rounds = 5
-        seconds = 120
-        restTime = 60
+        textRest.text = convertToTime(seekRest.progress * restInterval)
+        textTimer.text = convertToTime(seekTimer.progress * timerInterval)
 
         // Seekbar for rounds
         seekRounds.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         seekRest.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
-                restTime = progress
+                restTime = progress * restInterval
                 textRest.text = convertToTime(restTime)
 
             }
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         seekTimer.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
 
-                seconds = progress
+                seconds = progress * timerInterval
                 textTimer.text = convertToTime(seconds)
 
             }
