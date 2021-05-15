@@ -37,12 +37,13 @@
 
     <TextView
         android:id="@+id/textActiveTimer"
-        android:layout_width="333dp"
-        android:layout_height="130dp"
+        android:layout_width="412dp"
+        android:layout_height="211dp"
         android:gravity="center_horizontal|center_vertical"
         android:text="ActiveTimerText"
         android:textAppearance="@style/TextAppearance.AppCompat.Display4"
         android:textColor="@color/textColor"
+        android:textSize="150sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
