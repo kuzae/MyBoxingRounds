@@ -1,5 +1,6 @@
 package com.example.myboxingrounds
 
+import android.util.Log
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -22,27 +23,40 @@ class ActiveTimerActivity : AppCompatActivity() {
     private var roundsRemaining:Int = 0
     private var resting:Boolean = false
     private var restPerRound:Int = 0
+    private var state:String = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_active_timer)
 
-        window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-            // Note that system bars will only be "visible" if none of the
-            // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
-            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
-                hideSystemUI()
-            }
+        if (savedInstanceState == null) {
+
+            rounds = intent.getIntExtra("rounds", 0)
+            secondsPerRound = intent.getIntExtra("seconds", 0)
+            restPerRound = intent.getIntExtra("rest", 0)
+            timerLengthSeconds = secondsPerRound.toLong()
+
+        } else {
+
+            timerState = savedInstanceState.getSerializable("timerState") as TimerState
+            rounds = savedInstanceState.getInt("rounds", rounds)
+            secondsPerRound = savedInstanceState.getInt("secondsPerRound")
+            restPerRound = savedInstanceState.getInt("restPerRound")
+            roundsRemaining = savedInstanceState.getInt("roundsRemaining")
+            secondsRemaining = savedInstanceState.getLong("secondsRemaining")
+            resting =  savedInstanceState.getBoolean("resting")
+            timerLengthSeconds = secondsRemaining
+
         }
 
-        rounds = intent.getIntExtra("rounds", 0)
-        secondsPerRound = intent.getIntExtra("seconds", 0)
-        restPerRound = intent.getIntExtra("rest", 0)
-        roundsRemaining = rounds
-        timerLengthSeconds = secondsPerRound.toLong()
+        if ( roundsRemaining == 0 ) roundsRemaining = rounds
 
-        startTimer()
+        if ( timerState == TimerState.Paused ) {
+            updateUI()
+        } else if ( timerState == TimerState.Stopped || timerState == TimerState.Running ){
+            startTimer()
+        }
 
         buttonPause.setOnClickListener {
 
@@ -63,14 +77,36 @@ class ActiveTimerActivity : AppCompatActivity() {
 
         }
 
+        window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
+                hideSystemUI()
+            }
+        }
+
     }
 
+    // disables navbar when app is in focus
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) hideSystemUI()
+    }
 
-    // starts timer with using timerLengthSeconds
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        savedInstanceState.putInt("rounds", rounds)
+        savedInstanceState.putInt("secondsPerRound", secondsPerRound)
+        savedInstanceState.putInt("restPerRound", restPerRound)
+        savedInstanceState.putInt("roundsRemaining", roundsRemaining)
+        savedInstanceState.putLong("secondsRemaining", secondsRemaining)
+        savedInstanceState.putBoolean("resting", resting)
+        savedInstanceState.putSerializable("timerState", timerState)
+
+    }
+
+    // timer with using timerLengthSeconds
     private fun startTimer(){
         timerState = TimerState.Running
         textActiveTimer.text = convertToTime(timerLengthSeconds.toInt())
-        timerLengthSeconds++ // For smoother UX, add 1 extra second so the user sees the set time every time at the beginning
         timer = object : CountDownTimer((timerLengthSeconds * 1000), 1000){
 
             override fun onTick(millisUntilFinished: Long) {
@@ -138,21 +174,14 @@ class ActiveTimerActivity : AppCompatActivity() {
             buttonPause.text = "Resume"
             buttonReset.setTextColor(Color.parseColor("#000000"));
             textActiveRounds.text = "PAUSED"
+            textActiveTimer.text = convertToTime(secondsRemaining.toInt())
             // change button color to red
 
-        } else if (timerState == TimerState.Stopped) {
-
-            textActiveRounds.text = "$roundsRemaining/$rounds"
-
-        }
+        } 
 
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) hideSystemUI()
-    }
-
+    // Sets immersive, but leaves status bar on
     private fun hideSystemUI() {
         window.decorView.systemUiVisibility = (
                 // Set the content to appear under the system bars so that the
@@ -164,7 +193,7 @@ class ActiveTimerActivity : AppCompatActivity() {
                         or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
     }
 
-    // function to convert progress to time
+    // function to convert progress to time string
     private fun convertToTime(timerProgress: Int): String {
 
         val hours = TimeUnit.MINUTES.toHours(timerProgress.toLong())
