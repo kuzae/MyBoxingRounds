@@ -2,6 +2,7 @@ package com.example.myboxingrounds
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build.VERSION_CODES.N
 import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
@@ -21,17 +22,8 @@ class MainActivity : AppCompatActivity() {
         var rounds: Int = 5
         var seconds: Int = 300
         var restTime: Int = 60
-        var timerInterval: Int = 30
-        var restInterval: Int = 15
-
-
-        window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-            // Note that system bars will only be "visible" if none of the
-            // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
-            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
-                hideSystemUI()
-            }
-        }
+        val timerInterval: Int = 30
+        val restInterval: Int = 15
 
         // Set timer and rounds
         seekRounds.max = 30
@@ -138,6 +130,14 @@ class MainActivity : AppCompatActivity() {
             }
             sharedPrefsEditor.apply()
         })
+
+        window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+            // Note that system bars will only be "visible" if none of the
+            // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
+                hideSystemUI()
+            }
+        }
 
     }
 

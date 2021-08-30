@@ -2,6 +2,7 @@ package com.example.myboxingrounds
 
 import android.util.Log
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
@@ -24,6 +25,8 @@ class ActiveTimerActivity : AppCompatActivity() {
     private var resting:Boolean = false
     private var restPerRound:Int = 0
     private var state:String = ""
+    private var BellEFX: MediaPlayer? = null
+    private var warningSeconds:Long = 10
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,6 +108,9 @@ class ActiveTimerActivity : AppCompatActivity() {
 
     // timer with using timerLengthSeconds
     private fun startTimer(){
+
+        if (!resting) playShortBell()
+
         timerState = TimerState.Running
         textActiveTimer.text = convertToTime(timerLengthSeconds.toInt())
         timer = object : CountDownTimer((timerLengthSeconds * 1000), 1000){
@@ -113,15 +119,20 @@ class ActiveTimerActivity : AppCompatActivity() {
                 secondsRemaining = millisUntilFinished / 1000
                 textActiveTimer.text = convertToTime(secondsRemaining.toInt())
 
-                // if tick is equal to 10 seconds, play 10 second warning sound
+                if( secondsRemaining == warningSeconds ) {
+                    playWarning()
+                }
             }
 
             override fun onFinish() {
+                playLongBell()
                 onTimerFinished()
             }
+
         }
         updateUI()
         timer.start()
+
     }
 
     private fun pauseTimer(){
@@ -166,19 +177,40 @@ class ActiveTimerActivity : AppCompatActivity() {
 
             if(resting && restPerRound > 0) textActiveRounds.text = "RESTING" else textActiveRounds.text = "$roundsRemaining/$rounds"
             buttonPause.text = "Pause"
-            buttonReset.setTextColor(Color.parseColor("#808080"));
+            buttonReset.setTextColor(Color.parseColor("#808080"))
 
             // Change button color to green
         } else if ( timerState == TimerState.Paused ) {
 
             buttonPause.text = "Resume"
-            buttonReset.setTextColor(Color.parseColor("#000000"));
+            buttonReset.setTextColor(Color.parseColor("#000000"))
             textActiveRounds.text = "PAUSED"
             textActiveTimer.text = convertToTime(secondsRemaining.toInt())
             // change button color to red
 
         }
 
+    }
+
+    fun playLongBell(){
+        BellEFX = MediaPlayer.create(this, R.raw.hi_tone_bell)
+        BellEFX?.setOnPreparedListener{
+            BellEFX?.start()
+        }
+    }
+
+    fun playShortBell(){
+        BellEFX = MediaPlayer.create(this, R.raw.single_bell)
+        BellEFX?.setOnPreparedListener{
+            BellEFX?.start()
+        }
+    }
+
+    fun playWarning(){
+        BellEFX = MediaPlayer.create(this, R.raw.tensecwarning)
+        BellEFX?.setOnPreparedListener{
+            BellEFX?.start()
+        }
     }
 
     // Sets immersive, but leaves status bar on
